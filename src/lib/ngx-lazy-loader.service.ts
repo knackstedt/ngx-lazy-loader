@@ -104,8 +104,8 @@ export class NgxLazyLoaderService {
      */
     public registerComponent<T extends { new(...args: any[]): InstanceType<T>; }>(id: string, group = "default", component: T) {
         NgxLazyLoaderService.addComponentToRegistry({
-            id,
-            group,
+            id: stringToSlug(id),
+            group: stringToSlug(group),
             load: () => component
         })
     }
