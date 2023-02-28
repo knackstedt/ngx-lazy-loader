@@ -6,13 +6,9 @@
   ngx-lazy-loader is a lazy-loader that makes lazy-loaded components _not suck_
 </p>
 
-[![npm](https://img.shields.io/npm/v/ngx-lazy-loader.svg)](https://www.npmjs.com/package/ngx-lazy-loader)
-[![npm downloads](https://img.shields.io/npm/dt/ngx-lazy-loader.svg)](https://npmjs.org/ngx-lazy-loader)
-
-[![npm](https://img.shields.io/npm/dm/ngx-lazy-loader.svg)](https://www.npmjs.com/package/ngx-lazy-loader)
-
-[![GitHub contributors](https://img.shields.io/github/contributors/knackstedt/ngx-lazy-loader.svg?style=flat)](https://github.com/knackstedt/ngx-lazy-loader)
-
+[![npm](https://img.shields.io/npm/v/@dotglitch/ngx-lazy-loader.svg)](https://www.npmjs.com/package/@dotglitch/ngx-lazy-loader)
+[![npm](https://img.shields.io/npm/dm/@dotglitch/ngx-lazy-loader.svg)](https://www.npmjs.com/package/@dotglitch/ngx-lazy-loader)
+[![npm downloads](https://img.shields.io/npm/dt/@dotglitch/ngx-lazy-loader.svg)](https://npmjs.org/@dotglitch/ngx-lazy-loader)
 [![GitHub stars](https://img.shields.io/github/stars/knackstedt/ngx-lazy-loader.svg?label=GitHub%20Stars&style=flat)](https://github.com/knackstedt/ngx-lazy-loader)
 
 
