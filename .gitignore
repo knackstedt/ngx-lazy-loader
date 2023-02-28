@@ -1,3 +1,6 @@
+# Ignore node_modules in project folders.
+**/node_modules/
+
 # See http://help.github.com/ignore-files/ for more about ignoring files.
 
 # Compiled output
@@ -40,3 +43,4 @@ testem.log
 # System files
 .DS_Store
 Thumbs.db
+
