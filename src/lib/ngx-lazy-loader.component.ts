@@ -13,7 +13,7 @@ import { CompiledBundle, NgxLazyLoaderConfig } from './types';
     template: `
 <ng-container #content></ng-container>
 
-<div class="distractor" *ngIf="isDistractorVisible" [class.destroying]="isDestroyingDistractor">
+<div class="distractor" [class.destroying]="isDestroyingDistractor">
     <ng-container #loader></ng-container>
 </div>
   `,
@@ -210,7 +210,7 @@ export class NgxLazyLoaderComponent {
      * Active component container reference
      */
     private targetComponentContainerRef: ComponentRef<any>;
-
+    private targetRef: any;
     /**
      * Reference to the component class instance
      */
@@ -220,6 +220,7 @@ export class NgxLazyLoaderComponent {
      * Distractor component container reference
      */
     private distractorComponentRef: ComponentRef<any>;
+    private distractorRef: any;
 
 
     isDestroyingDistractor = false;
@@ -245,17 +246,10 @@ export class NgxLazyLoaderComponent {
         this.err = NgxLazyLoaderService.config.logger.err;
         this.warn = NgxLazyLoaderService.config.logger.warn;
         this.log = NgxLazyLoaderService.config.logger.log;
-
-        console.log("ngxlazyloaderinit", NgxLazyLoaderService.config);
     }
 
     ngOnInit() {
         this.showDistractor();
-
-        if (this.config.loaderDistractorComponent) {
-            this.distractorComponentRef = this.distractorContainer.createComponent(this.config.loaderDistractorComponent);
-            this.distractorContainer.insert(this.distractorComponentRef.hostView);
-        }
     }
 
     async ngAfterViewInit() {
@@ -267,8 +261,6 @@ export class NgxLazyLoaderComponent {
         //     this.outputs = this.dialogArguments.data?.outputs;
         //     this.id = this.dialogArguments.id;
         // }
-
-        this.showDistractor();
 
         if (!this._id) {
             this.warn("No component was specified!");
@@ -325,7 +317,7 @@ export class NgxLazyLoaderComponent {
 
             // Bootstrap the component into the container
             const componentRef = this.targetComponentContainerRef = this.targetContainer.createComponent(component as any);
-            this.targetContainer.insert(this.targetComponentContainerRef.hostView);
+            this.targetRef = this.targetContainer.insert(this.targetComponentContainerRef.hostView);
 
             const instance: any = this.targetComponentInstance = componentRef['instance'];
 
@@ -377,16 +369,26 @@ export class NgxLazyLoaderComponent {
         Object.entries(this.outputSubscriptions).forEach(([key, sub]) => {
             sub.unsubscribe();
         });
+        this.outputSubscriptions = {};
 
         // Clear the views
         this.distractorSubscription?.unsubscribe();
 
         // Clear target container
+        this.targetRef?.destroy();
         this.targetComponentContainerRef?.destroy();
         this.targetContainer?.clear();
 
+        this.distractorRef?.destroy();
         this.distractorComponentRef?.destroy();
         this.distractorContainer?.clear();
+
+        // Wipe the rest of the state clean
+        this.distractorSubscription = null;
+        this.targetRef = null;
+        this.targetComponentContainerRef = null;
+        this.distractorRef = null;
+        this.distractorComponentRef = null;
     }
 
     /**
@@ -442,7 +444,14 @@ export class NgxLazyLoaderComponent {
      * Show the progress spinner
      */
     private showDistractor() {
-        this.isDistractorVisible = true;
+
+        if (this.config.loaderDistractorComponent) {
+            // If we're already showing the distractor, do nothing.
+            if (this.distractorRef) return;
+
+            this.distractorComponentRef = this.distractorContainer.createComponent(this.config.loaderDistractorComponent);
+            this.distractorRef = this.distractorContainer.insert(this.distractorComponentRef.hostView);
+        }
     }
 
     /**
@@ -452,7 +461,13 @@ export class NgxLazyLoaderComponent {
         this.isDestroyingDistractor = true;
 
         setTimeout(() => {
-            this.isDistractorVisible = false;
+            // Dispose of the distractor ref bindings
+
+            this.distractorRef?.destroy();
+            this.distractorComponentRef?.destroy();
+
+            this.distractorRef = null;
+            this.distractorComponentRef = null;
         }, 300);
     }
 
