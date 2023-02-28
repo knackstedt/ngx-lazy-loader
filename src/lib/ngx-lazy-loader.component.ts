@@ -39,9 +39,10 @@ import { CompiledBundle, NgxLazyLoaderConfig } from './types';
     transition: opacity 300ms ease;
     z-index: 999999;
 
-    &.destroying {
-        opacity: 0;
-    }
+}
+
+.distractor.destroying {
+    opacity: 0;
 }
 
 button {
