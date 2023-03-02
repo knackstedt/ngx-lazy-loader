@@ -5,8 +5,8 @@
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build",
-    "prepublish": "npm version patch; npm run build",
-    "publish": "cd dist/ngx-lazy-loader && npm publish --dry-run && cd ..",
+    "prepublish": "cd src; npm version patch --force; cd ..; npm run build",
+    "publish": "cd dist && npm publish && cd ..",
     "dev": "ng build --watch --configuration development",
     "test": "ng test"
   },
