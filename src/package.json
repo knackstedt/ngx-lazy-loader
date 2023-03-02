@@ -1,6 +1,24 @@
 {
   "name": "@dotglitch/ngx-lazy-loader",
   "version": "0.0.5",
+  "repository": {
+    "url": "https://github.com/knackstedt/ngx-lazy-loader"
+  },
+  "author": {
+    "email": "andrewk@vivaldi.net",
+    "name": "Andrew G. Knackstedt"
+  },
+  "description": "A hackable lazy loader for Angular components",
+  "keywords": [
+    "angular",
+    "ngx",
+    "typescript",
+    "lazy-loading",
+    "ivy",
+    "ng2",
+    "ng",
+    "angular-service"
+  ],
   "peerDependencies": {
     "@angular/common": "^15.1.0",
     "@angular/core": "^15.1.0",
