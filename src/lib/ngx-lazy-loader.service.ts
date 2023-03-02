@@ -143,7 +143,7 @@ export class NgxLazyLoaderService {
      */
     public isComponentRegistered(id: string, group = "default") {
         return !!this.getRegistrationEntry(id, group);
-    };
+    }
 
     /**
      *
@@ -189,12 +189,14 @@ export class NgxLazyLoaderService {
                     });
 
                 if (matches.length > 1) {
-                    NgxLazyLoaderService.config.logger.err("Fuzzy classname matching resovled multiple targets!");
+                    NgxLazyLoaderService.config.logger.err("Fuzzy classname matching resolved multiple targets!");
                     return false;
                 }
 
-                if (matches.length == 0)
+                if (matches.length == 0) {
+                    NgxLazyLoaderService.config.logger.err("Fuzzy classname matching resolved no targets!");
                     return null;
+                }
 
                 return matches[0];
             }
