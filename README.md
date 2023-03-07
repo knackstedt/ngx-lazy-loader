@@ -12,6 +12,11 @@
 [![GitHub stars](https://img.shields.io/github/stars/knackstedt/ngx-lazy-loader.svg?label=GitHub%20Stars&style=flat)](https://github.com/knackstedt/ngx-lazy-loader)
 
 
+
+
+Quickstart 
+=====
+
 ## Install
 
 ```bash
@@ -19,9 +24,7 @@ $ npm install @dotglitch/ngx-lazy-loader
 ```
 
 
-## Quickstart 
-
-### With App Module
+### Import with App Module
 
 ```typescript
 import { NgModule } from '@angular/core';
@@ -44,7 +47,7 @@ export class AppModule {
 }
 ```
 
-### With App Component
+### Import with App Component
 
 ```typescript
 import { Component } from '@angular/core';
@@ -80,6 +83,7 @@ export const RegisteredComponents: ComponentRegistration[] = [
 > Notice that this has additional properties `icon`, `order` and `hidden`. These are used 
 > by the client application to render menus and are ignored by ngx-lazy-loader.
 
+
 ### Loading a Component
 ```html
 <ngx-lazy-loader
@@ -95,10 +99,15 @@ export const RegisteredComponents: ComponentRegistration[] = [
 />
 ```
 
-### Example
+
+Examples
+=====
+
+[![Open in StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz.svg)](https://stackblitz.com/github/avajs/ava/tree/main/examples/typescript-basic?file=source%2Ftest.ts&terminal=test&view=editor)
 
 
-## Configuration
+Configuration
+=====
 
 ```ts
 NgxLazyLoaderModule.forRoot({
@@ -147,8 +156,9 @@ component.registry.ts:
 import { ComponentRegistration } from '@dotglitch/ngx-lazy-loader';
 
 export const RegisteredComponents: ComponentRegistration[] = [
-    { id: 'Landing', group: "rootpage", load: () => import('src/app/pages/general/landing/landing.component')},
-    { id: 'About', group: "rootpage", load: () => import('src/app/pages/general/about/about.component')},
+    // Components are added into the "default" group unless otherwise specified.
+    { id: 'Landing', load: () => import('src/app/pages/general/landing/landing.component')},
+    { id: 'About', load: () => import('src/app/pages/general/about/about.component')},
 
     { id: 'TermsOfUse', group: "dialog", load: () => import('src/app/pages/general/termsofuse/termsofuse.component') },
     { id: 'PrivacyPolicy', group: "dialog", load: () => import('src/app/pages/general/privacypolicy/privacypolicy.component') },
@@ -188,3 +198,4 @@ Then, you just need to add the group when you reference the component:
 />
 
 ```
+
