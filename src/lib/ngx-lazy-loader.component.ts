@@ -43,6 +43,7 @@ import { CompiledBundle, NgxLazyLoaderConfig } from './types';
 
 .distractor.destroying {
     opacity: 0;
+    pointer-events: none;
 }
 
 button {
