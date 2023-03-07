@@ -80,7 +80,7 @@ export class NgxLazyLoaderComponent {
 
         // Check if there is a change to the loaded component's id
         // if it's updated, we destroy and rehydrate the entire container
-        if (this._id && this._id != id) {
+        if (this.initialized && this._id != id) {
             this.ngAfterViewInit();
         }
 
@@ -95,12 +95,16 @@ export class NgxLazyLoaderComponent {
         if (typeof group != "string" || !group) return;
 
         // If the group was updated, retry to bootstrap something into the container.
-        if (this._id && this._group != group) {
+        if (this.initialized && this._group != group) {
+            this._group = group;
+
             this.ngAfterViewInit();
+            return;
         }
 
         this._group = group;
     }
+    get group() { return this._group }
 
     private _inputs: { [key: string]: any; };
     /**
@@ -252,8 +256,10 @@ export class NgxLazyLoaderComponent {
         this.showDistractor();
     }
 
+    private initialized = false;
     async ngAfterViewInit() {
         this.ngOnDestroy();
+        this.initialized = true;
 
         // First, check for dialog arguments
         // if (this.dialogArguments) {
