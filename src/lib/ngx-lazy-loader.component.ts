@@ -1,4 +1,4 @@
-import { Input, ViewContainerRef, isDevMode, ComponentRef, EventEmitter, Optional, ViewChild, Component, Inject, Output, NgModule } from '@angular/core';
+import { Input, ViewContainerRef, isDevMode, ComponentRef, EventEmitter, Optional, ViewChild, Component, Inject, Output, NgModule, AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MAT_DIALOG_DATA, } from '@angular/material/dialog';
 import { DialogRef } from '@angular/cdk/dialog';
@@ -55,7 +55,7 @@ button {
     imports: [CommonModule],
     standalone: true
 })
-export class NgxLazyLoaderComponent {
+export class NgxLazyLoaderComponent implements AfterViewInit {
     @ViewChild("content", { read: ViewContainerRef }) targetContainer: ViewContainerRef;
     @ViewChild("loader", { read: ViewContainerRef }) distractorContainer: ViewContainerRef;
 
@@ -252,13 +252,11 @@ export class NgxLazyLoaderComponent {
         this.log = NgxLazyLoaderService.config.logger.log;
     }
 
-    ngOnInit() {
-        this.showDistractor();
-    }
-
     private initialized = false;
     async ngAfterViewInit() {
         this.ngOnDestroy();
+
+        this.showDistractor();
         this.initialized = true;
 
         // First, check for dialog arguments
