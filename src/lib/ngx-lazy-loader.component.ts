@@ -262,10 +262,10 @@ export class NgxLazyLoaderComponent implements AfterViewInit {
 
         // First, check for dialog arguments
         if (this.dialogArguments) {
-            this.inputs = this.dialogArguments.data?.inputs || this.dialogArguments.data;
-            this.outputs = this.dialogArguments.data?.outputs;
-            this.id = this.dialogArguments.data?.id;
-            this.group = this.dialogArguments.data?.group;
+            this.inputs = this.dialogArguments.inputs || this.dialogArguments.data;
+            this.outputs = this.dialogArguments.outputs;
+            this.id = this.dialogArguments.id;
+            this.group = this.dialogArguments.group;
         }
 
         if (!this._id) {
