@@ -251,14 +251,6 @@ export class NgxLazyLoaderComponent implements AfterViewInit {
         this.err = NgxLazyLoaderService.config.logger.err;
         this.warn = NgxLazyLoaderService.config.logger.warn;
         this.log = NgxLazyLoaderService.config.logger.log;
-    }
-
-    private initialized = false;
-    async ngAfterViewInit() {
-        this.ngOnDestroy();
-
-        this.showDistractor();
-        this.initialized = true;
 
         // First, check for dialog arguments
         if (this.dialogArguments) {
@@ -267,6 +259,14 @@ export class NgxLazyLoaderComponent implements AfterViewInit {
             this.id = this.dialogArguments.id;
             this.group = this.dialogArguments.group;
         }
+    }
+
+    private initialized = false;
+    async ngAfterViewInit() {
+        this.ngOnDestroy();
+
+        this.showDistractor();
+        this.initialized = true;
 
         if (!this._id) {
             this.warn("No component was specified!");
