@@ -1,3 +1,6 @@
+import { ComponentType } from '@angular/cdk/portal';
+import { TemplateRef } from '@angular/core';
+
 export enum ComponentResolveStrategy {
     /**
      * Match the fist component we find
@@ -26,9 +29,16 @@ export enum ComponentResolveStrategy {
 
 export type NgxLazyLoaderConfig = Partial<{
     entries: ComponentRegistration[],
-    notFoundComponent,
-    errorComponent,
-    loaderDistractorComponent,
+
+    notFoundTemplate: TemplateRef<any>,
+    notFoundComponent: ComponentType<any>,
+
+    errorTemplate: TemplateRef<any>,
+    errorComponent: ComponentType<any>,
+
+    loaderDistractorTemplate: TemplateRef<any>,
+    loaderDistractorComponent: ComponentType<any>,
+
     logger: {
         log: (...args: any) => void,
         warn: (...args: any) => void,

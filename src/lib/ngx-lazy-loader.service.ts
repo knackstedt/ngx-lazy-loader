@@ -1,4 +1,4 @@
-import { Inject, Injectable, InjectionToken, Component, NgModule, isDevMode } from '@angular/core';
+import { Inject, Injectable, InjectionToken, isDevMode } from '@angular/core';
 import { CompiledComponent, CompiledModule, ComponentRegistration, ComponentResolveStrategy, NgxLazyLoaderConfig } from './types';
 import { stringToSlug } from '../utils';
 import { Logger } from '../utils/logger';
@@ -20,18 +20,10 @@ export class NgxLazyLoaderService {
         };
     } = {};
 
-    // static set ComponentRegistry(data: ComponentRegistration[]) {
-    //     // data.map(c => (;
-    //     for (let i = 0; i < data.length; i++)
-    //         this.addComponentToRegistry(data[i]);
-    // }
-    // static get ComponentRegistry() {
-    //     return this.registryArr as ComponentRegistration[];
-    // }
-
     public static config: NgxLazyLoaderConfig;
 
     constructor(@Inject(NGX_LAZY_LOADER_CONFIG) config: NgxLazyLoaderConfig = {}) {
+        // Ensure this is singleton and works regardless of special instancing requirements.
         NgxLazyLoaderService.configure(config);
     }
 
@@ -58,6 +50,14 @@ export class NgxLazyLoaderService {
         ) {
             throw new Error("Cannot initialize. Configuration specifies a custom resolve matcher but none was provided");
         }
+
+        if (this.config.loaderDistractorComponent && this.config.loaderDistractorTemplate)
+            throw new Error("Cannot have both a Component and Template for Distractor view.")
+        if (this.config.errorComponent && this.config.errorTemplate)
+            throw new Error("Cannot have both a Component and Template for Error view.")
+        if (this.config.notFoundComponent && this.config.notFoundTemplate)
+            throw new Error("Cannot have both a Component and Template for NotFound view.")
+
     }
 
     private static addComponentToRegistry(registration: ComponentRegistration) {

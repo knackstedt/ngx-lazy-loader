@@ -1,8 +1,8 @@
-import { Input, ViewContainerRef, isDevMode, ComponentRef, EventEmitter, Optional, ViewChild, Component, Inject, Output, NgModule, AfterViewInit } from '@angular/core';
+import { Input, ViewContainerRef, isDevMode, ComponentRef, EventEmitter, Optional, ViewChild, Component, Inject, Output, NgModule, AfterViewInit, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MAT_DIALOG_DATA, } from '@angular/material/dialog';
 import { DialogRef } from '@angular/cdk/dialog';
-import { BehaviorSubject, Subscription } from 'rxjs';
+import { BehaviorSubject, debounceTime, Subscription } from 'rxjs';
 import { NgxLazyLoaderService } from './ngx-lazy-loader.service';
 import { stringToSlug } from '../utils';
 import { CompiledBundle, NgxLazyLoaderConfig } from './types';
@@ -13,8 +13,9 @@ import { CompiledBundle, NgxLazyLoaderConfig } from './types';
     template: `
 <ng-container #content></ng-container>
 
-<div class="distractor" [class.destroying]="isDestroyingDistractor">
-    <ng-container #loader></ng-container>
+<div class="ngx-lazy-loader-distractor" [class.destroying]="isClearingLoader">
+    <ng-container *ngIf="config.loaderDistractorComponent" [ngComponentOutlet]="config.loaderDistractorComponent"></ng-container>
+    <ng-container *ngIf="config.loaderDistractorTemplate" [ngTemplateOutlet]="config.loaderDistractorTemplate"></ng-container>
 </div>
   `,
     styles: [`
@@ -24,7 +25,7 @@ import { CompiledBundle, NgxLazyLoaderConfig } from './types';
     position: relative;
 }
 
-.distractor {
+.ngx-lazy-loader-distractor {
     position: absolute;
     top: 0;
     bottom: 0;
@@ -41,24 +42,16 @@ import { CompiledBundle, NgxLazyLoaderConfig } from './types';
 
 }
 
-.distractor.destroying {
+.ngx-lazy-loader-distractor.destroying {
     opacity: 0;
     pointer-events: none;
 }
-
-button {
-    position: absolute;
-    top: 12px;
-    right: 12px;
-}
-
 `],
     imports: [CommonModule],
     standalone: true
 })
 export class NgxLazyLoaderComponent implements AfterViewInit {
     @ViewChild("content", { read: ViewContainerRef }) targetContainer: ViewContainerRef;
-    @ViewChild("loader", { read: ViewContainerRef }) distractorContainer: ViewContainerRef;
 
     /**
      * ! Here be dragons.
@@ -222,24 +215,21 @@ export class NgxLazyLoaderComponent implements AfterViewInit {
     private targetComponentInstance: any;
 
     /**
-     * Distractor component container reference
-     */
-    private distractorComponentRef: ComponentRef<any>;
-    private distractorRef: any;
-
-
-    isDestroyingDistractor = false;
-    isDistractorVisible = true;
-
-    /**
      * Subscription with true/false state on whether the distractor should be
      */
     private distractorSubscription: Subscription;
 
-    private config: NgxLazyLoaderConfig;
+    public config: NgxLazyLoaderConfig;
     private err;
     private warn;
     private log;
+
+    // Force 500ms delay before revealing the spinner
+    private loaderEmitter = new EventEmitter();
+    private clearLoader$ = this.loaderEmitter.pipe(debounceTime(300));
+    private loaderSub: Subscription;
+    showLoader = true; // whether we render the DOM for the spinner
+    isClearingLoader = false; // should the spinner start fading out
 
     constructor(
         private service: NgxLazyLoaderService,
@@ -259,13 +249,18 @@ export class NgxLazyLoaderComponent implements AfterViewInit {
             this.id = this.dialogArguments.id;
             this.group = this.dialogArguments.group;
         }
+
+        this.loaderSub = this.clearLoader$.subscribe(() => {
+            this.showLoader = false;
+        });
     }
 
     private initialized = false;
     async ngAfterViewInit() {
-        this.ngOnDestroy();
+        this.ngOnDestroy(false);
+        this.isClearingLoader = false;
+        this.showLoader = true;
 
-        this.showDistractor();
         this.initialized = true;
 
         if (!this._id) {
@@ -286,7 +281,7 @@ export class NgxLazyLoaderComponent implements AfterViewInit {
 
 
             // Check if there is some corruption on the bundle.
-            if (bundle['__esModule'] as any !== true || bundle.toString() != "[object Module]") {
+            if (!bundle || typeof bundle != 'object' || bundle['__esModule'] as any !== true || bundle.toString() != "[object Module]") {
                 this.err(`Failed to load component/module for '${this._id}'! Parsed resource is invalid.`);
                 return this.loadError();
             }
@@ -337,18 +332,22 @@ export class NgxLazyLoaderComponent implements AfterViewInit {
             const isLoading$ = instance['ngxShowDistractor$'] as BehaviorSubject<boolean>;
             if (isLoading$ && typeof isLoading$.subscribe == "function") {
                 this.distractorSubscription = isLoading$.subscribe(loading => {
-                    if (!loading)
-                        this.hideDistractor();
-                    else
-                        this.showDistractor();
+                    if (!loading) {
+                        this.isClearingLoader = true;
+                        this.loaderEmitter.emit();
+                    }
+                    else {
+                        this.showLoader = true;
+                        this.isClearingLoader = false;
+                    }
                 });
             }
 
+
             const name = Object.keys(bundle)[0];
             this.log(`Loaded '${name}'`);
-
-            if (!isLoading$)
-                this.hideDistractor();
+            this.loaderEmitter.emit();
+            this.isClearingLoader = true;
 
             return componentRef;
         }
@@ -370,14 +369,18 @@ export class NgxLazyLoaderComponent implements AfterViewInit {
         }
     }
 
-    ngOnDestroy() {
+    ngOnDestroy(clearAll = true) {
         // unsubscribe from all subscriptions
         Object.entries(this.outputSubscriptions).forEach(([key, sub]) => {
             sub.unsubscribe();
         });
         this.outputSubscriptions = {};
 
-        // Clear the views
+        // Clear all things
+        if (clearAll) {
+            this.loaderSub?.unsubscribe();
+        }
+
         this.distractorSubscription?.unsubscribe();
 
         // Clear target container
@@ -385,16 +388,9 @@ export class NgxLazyLoaderComponent implements AfterViewInit {
         this.targetComponentContainerRef?.destroy();
         this.targetContainer?.clear();
 
-        this.distractorRef?.destroy();
-        this.distractorComponentRef?.destroy();
-        this.distractorContainer?.clear();
-
         // Wipe the rest of the state clean
-        this.distractorSubscription = null;
         this.targetRef = null;
         this.targetComponentContainerRef = null;
-        this.distractorRef = null;
-        this.distractorComponentRef = null;
     }
 
     /**
@@ -447,37 +443,6 @@ export class NgxLazyLoaderComponent implements AfterViewInit {
     }
 
     /**
-     * Show the progress spinner
-     */
-    private showDistractor() {
-
-        if (this.config.loaderDistractorComponent) {
-            // If we're already showing the distractor, do nothing.
-            if (this.distractorRef) return;
-
-            this.distractorComponentRef = this.distractorContainer.createComponent(this.config.loaderDistractorComponent);
-            this.distractorRef = this.distractorContainer.insert(this.distractorComponentRef.hostView);
-        }
-    }
-
-    /**
-     * Clear the progress spinner
-     */
-    private hideDistractor() {
-        this.isDestroyingDistractor = true;
-
-        setTimeout(() => {
-            // Dispose of the distractor ref bindings
-
-            this.distractorRef?.destroy();
-            this.distractorComponentRef?.destroy();
-
-            this.distractorRef = null;
-            this.distractorComponentRef = null;
-        }, 300);
-    }
-
-    /**
      * Load the "Default" component (404) screen normally.
      * This is shown when the component id isn't in the
      * registry or otherwise doesn't match
@@ -488,7 +453,7 @@ export class NgxLazyLoaderComponent implements AfterViewInit {
         if (this.config.notFoundComponent)
             this.targetContainer.createComponent(this.config.notFoundComponent);
 
-        this.hideDistractor();
+        this.showLoader = false;
     }
 
     /**
@@ -501,6 +466,6 @@ export class NgxLazyLoaderComponent implements AfterViewInit {
         if (this.config.errorComponent)
             this.targetContainer.createComponent(this.config.errorComponent);
 
-        this.hideDistractor();
+        this.showLoader = false;
     }
 }
