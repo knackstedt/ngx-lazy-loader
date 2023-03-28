@@ -24,15 +24,6 @@ export class NgxLazyLoaderModule {
     }
 
     private static instanceLoaded = false
-    constructor(){ //@Optional() @SkipSelf() parentModule?: NgxLazyLoaderModule) {
-        if (!NgxLazyLoaderModule.instanceLoaded) {
-            NgxLazyLoaderModule.instanceLoaded = true;
-        }
-        else {
-            throw new Error('NgxLazyLoaderModule is already loaded. Import it in AppModule only');
-        }
-        // if (parentModule) {
-        // }
-        // console.log("ngxlazyloader")
-    }
+    constructor()
+    { }
 }
