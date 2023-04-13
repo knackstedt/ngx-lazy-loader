@@ -99,12 +99,12 @@ export const RegisteredComponents: ComponentRegistration[] = [
 />
 ```
 
-
+<!--
 Examples
 =====
 
 [![Open in StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz.svg)](https://stackblitz.com/github/avajs/ava/tree/main/examples/typescript-basic?file=source%2Ftest.ts&terminal=test&view=editor)
-
+-->
 
 Configuration
 =====
