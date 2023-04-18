@@ -54,6 +54,8 @@ export type NgxLazyLoaderConfig = Partial<{
 
 export interface ComponentRegistration {
     id: string,
+
+    matcher?: string[] | RegExp | ((value: string) => boolean),
     /**
      * Specify a group to categorize components. If not specified,
      * will default to the `default` group.

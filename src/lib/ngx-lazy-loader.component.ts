@@ -269,7 +269,7 @@ export class NgxLazyLoaderComponent implements AfterViewInit {
         }
 
         try {
-            const entry = this.service.getRegistrationEntry(this._id, this._group);
+            const entry = this.service.resolveRegistrationEntry(this._id, this._group);
 
             if (!entry) {
                 this.err(`Failed to find Component '${this._id}' in registry!`);

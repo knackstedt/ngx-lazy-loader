@@ -3,6 +3,9 @@ import { CompiledComponent, CompiledModule, ComponentRegistration, ComponentReso
 import { stringToSlug } from '../utils';
 import { Logger } from '../utils/logger';
 
+// Monkey-patch the type of these symbols.
+const $id = Symbol("id") as any as string;
+const $group = Symbol("group") as any as string;
 
 export const NGX_LAZY_LOADER_CONFIG = new InjectionToken<NgxLazyLoaderConfig>('config');
 
@@ -13,11 +16,7 @@ export class NgxLazyLoaderService {
 
     // A proxied registry that mutates reference keys
     private static registry: {
-        [key: string]: { // group
-            [key: string]: { // id
-                id: string, load: Function;
-            };
-        };
+        [key: string]: ComponentRegistration[];
     } = {};
 
     public static config: NgxLazyLoaderConfig;
@@ -69,31 +68,28 @@ export class NgxLazyLoaderService {
         const id = stringToSlug(registration.id); // purge non-basic ASCII chars
         const group = registration.group || "default";
 
+        registration[$id] = id;
+        registration[$group] = id;
 
-        const entry = {
-            ...registration,
-            group: group,
-            id: id
-        };
 
         if (!this.registry[group])
-            this.registry[group] = {};
+            this.registry[group] = [];
 
         // Check if we already have a registration for the component
-        if (this.registry[group] && typeof this.registry[group]['load'] == "function") {
-            // Warn the developer that the state is problematic
-            this.config.logger.warn(
-                `A previous entry already exists for ${id}! The old registration will be overridden.` +
-                `Please ensure you use groups if you intend to have duplicate component ids. ` +
-                `If this was intentional, first remove the old component from the registry before adding a new instance`
-            );
+        // if (this.registry[group] && typeof this.registry[group]['load'] == "function") {
+        //     // Warn the developer that the state is problematic
+        //     this.config.logger.warn(
+        //         `A previous entry already exists for ${id}! The old registration will be overridden.` +
+        //         `Please ensure you use groups if you intend to have duplicate component ids. ` +
+        //         `If this was intentional, first remove the old component from the registry before adding a new instance`
+        //     );
 
-            // If we're in dev mode, break the loader surface
-            if (isDevMode())
-                return;
-        }
+        //     // If we're in dev mode, break the loader surface
+        //     if (isDevMode())
+        //         return;
+        // }
 
-        this.registry[group][id] = entry;
+        this.registry[group].push(registration);
     }
 
     /**
@@ -102,11 +98,12 @@ export class NgxLazyLoaderService {
      * @param group
      * @param component Angular Component Class constructor
      */
-    public registerComponent<T extends { new(...args: any[]): InstanceType<T>; }>(id: string, group = "default", component: T) {
+    public registerComponent<T extends { new(...args: any[]): InstanceType<T>; }>(args: {id: string, group: string, matcher: string[] | RegExp | ((val: string) => boolean), component: T}) {
         NgxLazyLoaderService.addComponentToRegistry({
-            id: stringToSlug(id),
-            group: stringToSlug(group),
-            load: () => component
+            id: stringToSlug(args.id),
+            matcher: args.matcher,
+            group: stringToSlug(args.group || "default"),
+            load: () => args.component
         })
     }
 
@@ -119,7 +116,7 @@ export class NgxLazyLoaderService {
         const _id = stringToSlug(id);
         const _group = stringToSlug(group);
 
-        if (!this.getRegistrationEntry(id, group))
+        if (!this.resolveRegistrationEntry(id, group))
             throw new Error("Cannot unregister component ${}! Component is not present in registry")
 
         // TODO: handle clearing running instances
@@ -131,18 +128,48 @@ export class NgxLazyLoaderService {
      * Get the registration entry for a component.
      * Returns null if component is not in the registry.
      */
-    public getRegistrationEntry(id: string, group = "default") {
-        const _id = stringToSlug(id);
+    public resolveRegistrationEntry(value: string, group = "default") {
+        const _id = stringToSlug(value);
         const _group = stringToSlug(group);
 
-        return (NgxLazyLoaderService.registry[_group] || {})[_id];
+        const targetGroup = (NgxLazyLoaderService.registry[_group] || []);
+
+        let items = targetGroup.filter(t => {
+            // No matcher, check id
+            if (!t.matcher)
+                return t[$id] == _id;
+
+            // Matcher is regex
+            if (t.matcher instanceof RegExp)
+                return t.matcher.test(_id) || t.matcher.test(value);
+
+            // Matcher is string => regex
+            if (typeof t.matcher == 'string') {
+                const rx = new RegExp(t.matcher, 'ui');
+                return rx.test(_id) || rx.test(value);
+            }
+
+            // Matcher is array
+            if (Array.isArray(t.matcher)) {
+                return !!t.matcher.find(e => stringToSlug(e) == _id);
+            }
+
+            // Custom matcher function
+            if (typeof t.matcher == "function")
+                return t.matcher(_id);
+
+            return false;
+        });
+
+        return items[0];
     }
 
     /**
      * Check if a component is currently registered
+     * Can be used to validate regex matchers and aliases.
      */
-    public isComponentRegistered(id: string, group = "default") {
-        return !!this.getRegistrationEntry(id, group);
+    public isComponentRegistered(value: string, group = "default") {
+        return !!this.resolveRegistrationEntry(value, group);
     }
 
     /**
