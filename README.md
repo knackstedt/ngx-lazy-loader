@@ -3,7 +3,7 @@
 </a>
 
 <p align="center">
-  ngx-lazy-loader is a lazy-loader that makes lazy-loaded components _not suck_
+  ngx-lazy-loader makes Lazy-loading Angular components a breeze. Now with Input bindings!
 </p>
 
 [![npm](https://img.shields.io/npm/v/@dotglitch/ngx-lazy-loader.svg)](https://www.npmjs.com/package/@dotglitch/ngx-lazy-loader)
@@ -29,7 +29,12 @@ $ npm install @dotglitch/ngx-lazy-loader
 ```typescript
 import { NgModule } from '@angular/core';
 import { NgxLazyLoaderModule } from '@dotglitch/ngx-lazy-loader';
-import { RegisteredComponents } from 'src/app/component.registry';
+import { ProgressDistractorComponent } from './@framework/progress-distractor/progress-distractor.component';
+import { NotFoundComponent } from './@framework/not-found/not-found.component';
+import { ErrorComponent } from './@framework/error/error.component';
+import { Pages } from 'src/app/page.registry';
+import { Dialogs } from 'src/app/dialog.registry';
+import { Charts } from 'src/app/chart.registry';
 
 @NgModule({
     declarations: [
@@ -38,7 +43,14 @@ import { RegisteredComponents } from 'src/app/component.registry';
     imports: [
         ...
         NgxLazyLoaderModule.forRoot({
-            entries: RegisteredComponents
+            entries: [
+                ...Pages,
+                ...Dialogs,
+                ...Charts
+            ],
+            loaderDistractorComponent: ProgressDistractorComponent,
+            errorComponent: ErrorComponent,
+            notFoundComponent: NotFoundComponent
         })
     ]
     bootstrap: [AppComponent]
@@ -47,7 +59,7 @@ export class AppModule {
 }
 ```
 
-### Import with App Component
+<!-- ### Import with App Component
 
 ```typescript
 import { Component } from '@angular/core';
@@ -82,22 +94,23 @@ export const RegisteredComponents: ComponentRegistration[] = [
 ```
 > Notice that this has additional properties `icon`, `order` and `hidden`. These are used 
 > by the client application to render menus and are ignored by ngx-lazy-loader.
-
+ -->
 
 ### Loading a Component
 ```html
 <ngx-lazy-loader
-    class="foo"
     component="TestChild"
+    group="MyNonDefaultGroup"
     [inputs]="{
         prop1: value1,
         prop2: value2
     }"
     [outputs]="{
-        buttonClicked: onChildButtonClicked
+        buttonClicked: onChildButtonClicked.bind(this)
     }"
 />
 ```
+> As of release 0.0.17, outputs must be bound with .bind(this). We're working on improvements, but this is the most stable fix so far.
 
 <!--
 Examples
@@ -182,20 +195,77 @@ Then, you just need to add the group when you reference the component:
 
 ```html
 <ngx-lazy-loader
-    class="foo"
     component="TestChild"
     [inputs]="{
         prop1: value1,
         prop2: value2,
         prop5: 'asd',
         complex: complicated,
-        myExternalKey: 'balloon'
+        myExternalKey: 'balloon',
+        ...
     }"
     [outputs]="{
         prop3: onOutputFire,
-        buttonClicked: onChildButtonClicked
+        buttonClicked: onChildButtonClicked,
+        ...
     }"
 />
 
 ```
 
+
+### Using ID Matchers
+```ts
+const registry: ComponentRegistration[] = [
+    {
+        group: "editor",
+        matcher: [
+            "fruit",
+            "vegetables",
+            "legumes"
+        ],
+        height: "750px",
+        width: "1450px",
+        load: () => import('src/app/pages/food-editor.component')
+    },
+    
+    // This catches any value that doesn't exist on the previous matcher in the same group.
+    // Order of these entries matters.
+    {
+        group: "editor",
+        matcher: /.*/,
+        height: "700px",
+        width: "500px",
+        load: () => import('src/app/pages/generic-editor.component')
+    },
+    ...
+
+
+    {
+        group: "dialogs",
+        // Custom matchers can be provided, and will check against the original input
+        matcher: (value: string) => value.contains("-dialog") && !value.contains("navigation"),
+        height: "750px",
+        width: "1450px",
+        load: () => import('src/app/pages/@dialogs/confirmation.component')
+    },
+    // If using matchers and no match can be made, the standard NotFound component/template is loaded
+]
+```
+
+> This example contains additional properties on the registrations. When these are present, getting the matched component by running `this.lazyLoader.resolveRegistrationEntry(name, opts.group || "default")` from a DI injected instance of `private lazyLoader: NgxLazyLoaderService` will return the original entry. This can be used to additionally change parts of the UI as necessary.
+
+Debugging
+=====
+
+### My Component doesn't load
+- Look for formatted console logs.
+
+### Component could not be resolved
+- Make sure the component is registered and the registry is imported in your app.module
+- Make sure the registration id is valid
+- Make sure the registration group is the same as in the HTML attribute `<ngx-lazy-loader group="group1"/>`
+- Check the registration matchers
+- Check the specified component selector
+
+> Matchers slugify the strings that they check
