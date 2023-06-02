@@ -330,6 +330,7 @@ export class NgxLazyLoaderComponent implements AfterViewInit {
             // Look for an observable called isLoading$ that will make us show/hide
             // the same distractor that is used on basic loading
             const isLoading$ = instance['ngxShowDistractor$'] as BehaviorSubject<boolean>;
+
             if (isLoading$ && typeof isLoading$.subscribe == "function") {
                 this.distractorSubscription = isLoading$.subscribe(loading => {
                     if (!loading) {
@@ -342,12 +343,13 @@ export class NgxLazyLoaderComponent implements AfterViewInit {
                     }
                 });
             }
-
+            else {
+                this.isClearingLoader = true;
+            }
 
             const name = Object.keys(bundle)[0];
             this.log(`Loaded '${name}'`);
             this.loaderEmitter.emit();
-            this.isClearingLoader = true;
 
             return componentRef;
         }
