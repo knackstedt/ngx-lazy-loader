@@ -75,10 +75,12 @@ export class NgxLazyLoaderComponent implements AfterViewInit {
         // Check if there is a change to the loaded component's id
         // if it's updated, we destroy and rehydrate the entire container
         if (this.initialized && this._id != id) {
+            this._id = id;
             this.ngAfterViewInit();
         }
-
-        this._id = id;
+        else {
+            this._id = id;
+        }
     };
 
 
