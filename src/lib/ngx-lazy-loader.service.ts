@@ -13,6 +13,9 @@ export const NGX_LAZY_LOADER_CONFIG = new InjectionToken<NgxLazyLoaderConfig>('c
     providedIn: 'root'
 })
 export class NgxLazyLoaderService {
+    private get err() { return NgxLazyLoaderService.config.logger.err; }
+    private get log() { return NgxLazyLoaderService.config.logger.log; }
+    private get warn() { return NgxLazyLoaderService.config.logger.warn; }
 
     // A proxied registry that mutates reference keys
     private static registry: {
@@ -161,7 +164,22 @@ export class NgxLazyLoaderService {
             return false;
         });
 
-        return items[0];
+        if (items.length > 1) {
+            this.warn("Resolved multiple components for the provided `[component]` binding. This may cause UI conflicts.");
+        }
+
+        const out = items[0];
+
+        if (out.matcher instanceof RegExp) {
+            const result = _id.match(out.matcher) || value.match(out.matcher);
+
+            return {
+                entry: out,
+                matchGroups: result?.groups
+            };
+        }
+
+        return { entry: out };
     }
 
     /**

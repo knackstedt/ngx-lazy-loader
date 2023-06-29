@@ -102,6 +102,7 @@ export class NgxLazyLoaderComponent implements AfterViewInit {
     }
     get group() { return this._group }
 
+    private _matchGroups: { [key: string]: string };
     private _inputs: { [key: string]: any; };
     /**
      * A map of inputs to bind to the child.
@@ -271,7 +272,8 @@ export class NgxLazyLoaderComponent implements AfterViewInit {
         }
 
         try {
-            const entry = this.service.resolveRegistrationEntry(this._id, this._group);
+            const { entry, matchGroups } = this.service.resolveRegistrationEntry(this._id, this._group);
+            this._matchGroups = matchGroups;
 
             if (!entry) {
                 this.err(`Failed to find Component '${this._id}' in registry!`);
@@ -402,6 +404,14 @@ export class NgxLazyLoaderComponent implements AfterViewInit {
      */
     private bindInputs() {
         if (!this._inputs || !this.targetComponentInstance) return;
+
+        // Merge match groups
+        if (typeof this._matchGroups == "object") {
+            Object.entries(this._matchGroups).forEach(([key, val]) => {
+                if (typeof this._inputs[key] == 'undefined')
+                    this._inputs[key] = val;
+            });
+        }
 
         // forward-bind inputs
         const { inputs } = this.targetComponentFactory.ɵcmp;
