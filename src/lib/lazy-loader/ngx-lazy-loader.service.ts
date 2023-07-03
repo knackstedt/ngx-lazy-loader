@@ -102,7 +102,7 @@ export class NgxLazyLoaderService {
      * @param component Angular Component Class constructor
      */
     public registerComponent<T extends { new(...args: any[]): InstanceType<T>; }>
-        (args: { id: string, group: string, matcher: string[] | RegExp | ((val: string) => boolean), component?: T, load?: () => any}) {
+        (args: { id: string, group?: string, matcher?: string[] | RegExp | ((val: string) => boolean), component?: T, load?: () => any}) {
         NgxLazyLoaderService.addComponentToRegistry({
             id: stringToSlug(args.id),
             matcher: args.matcher,
