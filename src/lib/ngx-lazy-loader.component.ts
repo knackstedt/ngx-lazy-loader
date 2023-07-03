@@ -21,6 +21,7 @@ import { CompiledBundle, NgxLazyLoaderConfig } from './types';
     styles: [`
 :host {
     display: contents;
+    contain: content;
     z-index: 1;
     position: relative;
 }
