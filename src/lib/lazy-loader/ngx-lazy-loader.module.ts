@@ -1,5 +1,5 @@
 import { ModuleWithProviders, NgModule, Optional, SkipSelf } from '@angular/core';
-import { NgxLazyLoaderConfig } from './types';
+import { NgxLazyLoaderConfig } from '../types';
 import { NgxLazyLoaderComponent } from './ngx-lazy-loader.component';
 import { NgxLazyLoaderService, NGX_LAZY_LOADER_CONFIG } from './ngx-lazy-loader.service';
 

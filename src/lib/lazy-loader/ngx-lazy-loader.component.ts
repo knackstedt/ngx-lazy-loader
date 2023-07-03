@@ -1,54 +1,18 @@
 import { Input, ViewContainerRef, isDevMode, ComponentRef, EventEmitter, Optional, ViewChild, Component, Inject, Output, NgModule, AfterViewInit, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { NgComponentOutlet, NgIf, NgTemplateOutlet } from '@angular/common';
 import { MAT_DIALOG_DATA, } from '@angular/material/dialog';
 import { DialogRef } from '@angular/cdk/dialog';
 import { BehaviorSubject, debounceTime, Subscription } from 'rxjs';
 import { NgxLazyLoaderService } from './ngx-lazy-loader.service';
-import { stringToSlug } from '../utils';
-import { CompiledBundle, NgxLazyLoaderConfig } from './types';
+import { stringToSlug } from '../../utils';
+import { CompiledBundle, NgxLazyLoaderConfig } from '../types';
 
 
 @Component({
     selector: 'ngx-lazy-loader',
-    template: `
-<ng-container #content></ng-container>
-
-<div class="ngx-lazy-loader-distractor" [class.destroying]="isClearingLoader">
-    <ng-container *ngIf="config.loaderDistractorComponent" [ngComponentOutlet]="config.loaderDistractorComponent"></ng-container>
-    <ng-container *ngIf="config.loaderDistractorTemplate" [ngTemplateOutlet]="config.loaderDistractorTemplate"></ng-container>
-</div>
-  `,
-    styles: [`
-:host {
-    display: contents;
-    contain: content;
-    z-index: 1;
-    position: relative;
-}
-
-.ngx-lazy-loader-distractor {
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-direction: column;
-    background-color: var(--background-color, #212121);
-    opacity: 1;
-    transition: opacity 300ms ease;
-    z-index: 999999;
-
-}
-
-.ngx-lazy-loader-distractor.destroying {
-    opacity: 0;
-    pointer-events: none;
-}
-`],
-    imports: [CommonModule],
+    templateUrl: './ngx-lazy-loader.component.html',
+    styleUrls: [ './ngx-lazy-loader.component.scss' ],
+    imports: [ NgIf, NgComponentOutlet, NgTemplateOutlet ],
     standalone: true
 })
 export class NgxLazyLoaderComponent implements AfterViewInit {

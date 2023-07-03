@@ -1,7 +1,7 @@
 import { Inject, Injectable, InjectionToken, isDevMode } from '@angular/core';
-import { CompiledComponent, CompiledModule, ComponentRegistration, ComponentResolveStrategy, NgxLazyLoaderConfig } from './types';
-import { stringToSlug } from '../utils';
-import { Logger } from '../utils/logger';
+import { CompiledComponent, CompiledModule, ComponentRegistration, ComponentResolveStrategy, NgxLazyLoaderConfig } from '../types';
+import { stringToSlug } from '../../utils';
+import { Logger } from '../../utils/logger';
 
 // Monkey-patch the type of these symbols.
 const $id = Symbol("id") as any as string;
