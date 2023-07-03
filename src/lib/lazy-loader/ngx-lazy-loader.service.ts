@@ -101,12 +101,13 @@ export class NgxLazyLoaderService {
      * @param group
      * @param component Angular Component Class constructor
      */
-    public registerComponent<T extends { new(...args: any[]): InstanceType<T>; }>(args: {id: string, group: string, matcher: string[] | RegExp | ((val: string) => boolean), component: T}) {
+    public registerComponent<T extends { new(...args: any[]): InstanceType<T>; }>
+        (args: { id: string, group: string, matcher: string[] | RegExp | ((val: string) => boolean), component?: T, load?: () => any}) {
         NgxLazyLoaderService.addComponentToRegistry({
             id: stringToSlug(args.id),
             matcher: args.matcher,
             group: stringToSlug(args.group || "default"),
-            load: () => args.component
+            load: args.load || (() => args.component)
         })
     }
 
