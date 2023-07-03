@@ -138,6 +138,8 @@ export class NgxLazyLoaderService {
         const targetGroup = (NgxLazyLoaderService.registry[_group] || []);
 
         let items = targetGroup.filter(t => {
+            if (!t) return false;
+
             // No matcher, check id
             if (!t.matcher)
                 return t[$id] == _id;
