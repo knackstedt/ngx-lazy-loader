@@ -1,5 +1,5 @@
 import { Inject, Injectable, InjectionToken, isDevMode } from '@angular/core';
-import { CompiledComponent, CompiledModule, ComponentRegistration, ComponentResolveStrategy, NgxLazyLoaderConfig } from '../types';
+import { CompiledComponent, CompiledModule, ComponentRegistration, ComponentResolveStrategy, NgxLazyLoaderConfig } from './types';
 import { stringToSlug } from '../../utils';
 import { Logger } from '../../utils/logger';
 
@@ -168,6 +168,9 @@ export class NgxLazyLoaderService {
 
         if (items.length > 1) {
             this.warn("Resolved multiple components for the provided `[component]` binding. This may cause UI conflicts.");
+        }
+        if (items.length == 0) {
+            return null;
         }
 
         const out = items[0];

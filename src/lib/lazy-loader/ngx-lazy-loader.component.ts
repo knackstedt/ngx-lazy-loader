@@ -5,7 +5,7 @@ import { DialogRef } from '@angular/cdk/dialog';
 import { BehaviorSubject, debounceTime, Subscription } from 'rxjs';
 import { NgxLazyLoaderService } from './ngx-lazy-loader.service';
 import { stringToSlug } from '../../utils';
-import { CompiledBundle, NgxLazyLoaderConfig } from '../types';
+import { CompiledBundle, NgxLazyLoaderConfig } from './types';
 
 
 @Component({
