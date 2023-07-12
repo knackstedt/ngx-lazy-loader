@@ -1,5 +1,5 @@
 import { Inject, Injectable, InjectionToken, isDevMode } from '@angular/core';
-import { CompiledComponent, CompiledModule, ComponentRegistration, ComponentResolveStrategy, NgxLazyLoaderConfig } from './types';
+import { CompiledComponent, CompiledModule, ComponentRegistration, ComponentResolveStrategy, DynamicRegistrationArgs, NgxLazyLoaderConfig } from './types';
 import { stringToSlug } from '../../utils';
 import { Logger } from '../../utils/logger';
 
@@ -64,7 +64,7 @@ export class NgxLazyLoaderService {
 
     private static addComponentToRegistry(registration: ComponentRegistration) {
         if (!registration)
-            throw new Error("Cannot add " + registration + " component into registry.");
+            throw new Error("Cannot add <undefined> component into registry.");
 
         // Clone the object into our repository and transfer the id into a standardized slug format
 
@@ -101,14 +101,18 @@ export class NgxLazyLoaderService {
      * @param group
      * @param component Angular Component Class constructor
      */
-    public registerComponent<T extends { new(...args: any[]): InstanceType<T>; }>
-        (args: { id: string, group?: string, matcher?: string[] | RegExp | ((val: string) => boolean), component?: T, load?: () => any}) {
+    public registerComponent<T extends { new(...args: any[]): InstanceType<T>; }>(args: DynamicRegistrationArgs<T>) {
+        if (this.isComponentRegistered(args.id, args.group)) {
+            this.log(`Will not re-register component '${args.id}' in group '${args.group || 'default'}' `);
+            return;
+        }
+
         NgxLazyLoaderService.addComponentToRegistry({
             id: stringToSlug(args.id),
             matcher: args.matcher,
             group: stringToSlug(args.group || "default"),
             load: args.load || (() => args.component)
-        })
+        });
     }
 
     /**
