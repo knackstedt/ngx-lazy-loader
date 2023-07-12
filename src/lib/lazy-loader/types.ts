@@ -66,6 +66,14 @@ export interface ComponentRegistration {
     [key: string]: any
 }[];
 
+export type DynamicRegistrationArgs<T = any> = {
+    id: string,
+    group?: string,
+    matcher?: string[] | RegExp | ((val: string) => boolean),
+    component?: T,
+    load?: () => any;
+}
+
 /**
  * This is roughly a compiled component
  */
