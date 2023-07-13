@@ -237,13 +237,16 @@ export class NgxLazyLoaderComponent implements AfterViewInit {
         }
 
         try {
-            const { entry, matchGroups } = this.service.resolveRegistrationEntry(this._id, this._group);
-            this._matchGroups = matchGroups;
+            const _entry = this.service.resolveRegistrationEntry(this._id, this._group);
+            if (!_entry)
 
-            if (!entry) {
+            if (!_entry || !_entry.entry) {
                 this.err(`Failed to find Component '${this._id}' in registry!`);
                 return this.loadDefault();
             }
+
+            const { entry, matchGroups } = _entry;
+            this._matchGroups = matchGroups;
 
             // Download the "module" (the standalone component)
             const bundle: CompiledBundle = this.targetModule = await entry.load();
