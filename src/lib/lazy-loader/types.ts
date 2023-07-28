@@ -52,19 +52,30 @@ export type NgxLazyLoaderConfig = Partial<{
     customResolver: (registry: (CompiledComponent | CompiledModule)[]) => Object
 }>;
 
-export interface ComponentRegistration {
-    id: string,
-
-    matcher?: string[] | RegExp | ((value: string) => boolean),
+type RegistrationConfig = {
     /**
      * Specify a group to categorize components. If not specified,
      * will default to the `default` group.
      */
     group?: string,
+    /**
+     * load: () => import('./pages/my-page/my-page.component')
+     */
     load: () => any,
 
+    /**
+     * Called before a component is loaded.
+     * If it returns `false` the component will not be loaded.
+     */
+    // canActivate: () => boolean
+
     [key: string]: any
-}[];
+}
+
+export type ComponentRegistration = (
+    ({ id: string } & RegistrationConfig) |
+    ({ matcher: string[] | RegExp | ((value: string) => boolean) })
+)[];
 
 export type DynamicRegistrationArgs<T = any> = {
     id: string,
