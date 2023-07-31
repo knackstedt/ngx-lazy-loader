@@ -163,6 +163,12 @@ export class NgxLazyLoaderComponent implements AfterViewInit {
 
 
     /**
+     * This is an instance of the component that is currently loaded.
+     */
+    public instance: any;
+
+
+    /**
      * Container that provides the component data
      */
     private targetModule: CompiledBundle;
@@ -238,10 +244,8 @@ export class NgxLazyLoaderComponent implements AfterViewInit {
 
         try {
             const _entry = this.service.resolveRegistrationEntry(this._id, this._group);
-            if (!_entry)
-
             if (!_entry || !_entry.entry) {
-                this.err(`Failed to find Component '${this._id}' in registry!`);
+                this.err(`Failed to find Component '${this._id}' in group '${this._group}' in registry!`);
                 return this.loadDefault();
             }
 
@@ -298,6 +302,7 @@ export class NgxLazyLoaderComponent implements AfterViewInit {
             this.bindOutputs();
 
             this.componentLoaded.next(instance);
+            this.instance = instance;
 
             // Look for an observable called isLoading$ that will make us show/hide
             // the same distractor that is used on basic loading
