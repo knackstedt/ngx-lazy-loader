@@ -74,8 +74,8 @@ type RegistrationConfig = {
 
 export type ComponentRegistration = (
     ({ id: string } & RegistrationConfig) |
-    ({ matcher: string[] | RegExp | ((value: string) => boolean) })
-)[];
+    ({ matcher: string[] | RegExp | ((value: string) => boolean); } & RegistrationConfig)
+);
 
 export type DynamicRegistrationArgs<T = any> = {
     id: string,
