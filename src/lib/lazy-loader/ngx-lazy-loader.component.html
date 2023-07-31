@@ -2,5 +2,5 @@
 
 <div class="ngx-lazy-loader-distractor" [class.destroying]="isClearingLoader">
     <ng-container *ngIf="config.loaderDistractorComponent" [ngComponentOutlet]="config.loaderDistractorComponent"></ng-container>
-    <ng-container *ngIf="config.loaderDistractorTemplate" [ngTemplateOutlet]="config.loaderDistractorTemplate"></ng-container>
+    <ng-container *ngIf="config.loaderDistractorTemplate" [ngTemplateOutlet]="config.loaderDistractorTemplate" [ngTemplateOutletContext]="{ '$implicit': inputs }"></ng-container>
 </div>
