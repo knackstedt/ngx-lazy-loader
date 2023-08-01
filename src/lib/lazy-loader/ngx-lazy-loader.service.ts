@@ -68,7 +68,7 @@ export class NgxLazyLoaderService {
 
         // Clone the object into our repository and transfer the id into a standardized slug format
 
-        const id = stringToSlug(registration.id ?? Date.now()); // purge non-basic ASCII chars
+        const id = stringToSlug(registration.id ?? Date.now().toString()); // purge non-basic ASCII chars
         const group = registration.group || "default";
 
         registration[$id] = id;
