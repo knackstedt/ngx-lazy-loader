@@ -1,6 +1,6 @@
 {
   "name": "@dotglitch/ngx-lazy-loader",
-  "version": "0.0.30",
+  "version": "0.0.31",
   "repository": {
     "url": "https://github.com/knackstedt/ngx-lazy-loader"
   },
