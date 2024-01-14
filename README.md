@@ -1,3 +1,5 @@
+> :warning: **This project has been moved**: [Here](https://github.com/knackstedt/dotglitch-ngx/blob/main/packages/common/src/components/lazy-loader)
+> 
 <a href="https://dotglitch.dev">
   <h1 align="center">ngx-lazy-loader</h1>
 </a>
